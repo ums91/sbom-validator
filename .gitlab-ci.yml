@@ -1,1 +1,17 @@
+stages:
+  - validate
+
+validate_sboms:
+  stage: validate
+  image: python:3.11
+  script:
+    - pip install --upgrade pip
+    - python validate_sbom.py
+    - git config user.email "gitlab-bot@example.com"
+    - git config user.name "GitLab Bot"
+    - git add README.md
+    - git commit -m "✅ SBOM check updated" || echo "No changes"
+    - git push || echo "Nothing to push"
+  only:
+    - main
 
