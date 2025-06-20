@@ -10,10 +10,13 @@ validate_sboms:
     - git config user.email "gitlab-bot@example.com"
     - git config user.name "GitLab Bot"
     - git add README.md
-    - git commit -m "✅ Auto SBOM check on new upload" || echo "No changes"
+    - git commit -m "✅ SBOM check updated" || echo "No changes"
     - git push || echo "Nothing to push"
-  only:
-    changes:
-      - SBOMs to be checked/*.json   # 👈 Triggers only if SBOMs change
-    refs:
-      - main                         # 👈 On the main branch
+  rules:
+    # ✅ Auto-run on SBOM file changes
+    - changes:
+        - SBOMs to be checked/*.json
+      when: on_success
+
+    # ▶️ Also allow manual run anytime
+    - when: manual
