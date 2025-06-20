@@ -1,22 +1,44 @@
-stages:
-  - validate
+name: 🧪 Validate SBOMs
 
-validate_sboms:
-  stage: validate
-  image: python:3.11
-  script:
-    - pip install --upgrade pip
-    - python validate_sbom.py
-    - git config user.email "gitlab-bot@example.com"
-    - git config user.name "GitLab Bot"
-    - git add README.md
-    - git commit -m "✅ SBOM check updated" || echo "No changes"
-    - git push || echo "Nothing to push"
-  rules:
-    # ✅ Auto-run on SBOM file changes
-    - changes:
-        - SBOMs to be checked/*.json
-      when: on_success
+on:
+  push:
+    paths:
+      - 'SBOMs to be checked/*.json'   # ✅ Auto-run on SBOM file changes
+  workflow_dispatch:                  # ▶️ Manual run option from Actions tab
+    inputs:
+      recheck_all:
+        description: 'Force recheck all SBOMs (even if already validated)'
+        required: false
+        default: 'false'
 
-    # ▶️ Also allow manual run anytime
-    - when: manual
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: 🔄 Install dependencies (if any)
+        run: pip install --upgrade pip
+
+      - name: 🧪 Run validation script
+        run: |
+          FLAGS=""
+          if [[ "${{ github.event.inputs.recheck_all }}" == "true" ]]; then
+            FLAGS="--recheck-all"
+          fi
+          python validate_sbom.py $FLAGS
+
+      - name: ✅ Commit README.md update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "✅ SBOM check updated" || echo "No changes to commit"
+          git push
