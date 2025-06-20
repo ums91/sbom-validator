@@ -23,3 +23,7 @@ Each SBOM will be validated for mandatory fields and the result will be appended
 - 🧩 Component[0]: Missing or incorrect `supplier.name` (Expected: `test supplier`)
 - 🧩 Component[0]: Missing field `author`
 - 🧩 Component[0]: Missing property `previous_version` in `properties`
+
+## ✅ Result for `test.json`
+❌ Validation failed. Missing or invalid parameters:
+- 🔴 Invalid value for `specVersion`: `1.6` (Expected: `1.6.1`)
