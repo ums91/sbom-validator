@@ -60,28 +60,45 @@ def validate_sbom(filepath):
     return (len(missing) == 0), missing
 
 def append_result(sbom_name, is_valid, issues):
-    with open(README_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"\n## ✅ Result for `{sbom_name}`\n")
-        if is_valid:
-            f.write("✅ All required parameters are present and valid.\n")
-        else:
-            f.write("❌ Validation failed. Missing or invalid parameters:\n")
-            for issue in issues:
-                f.write(f"- {issue}\n")
+    new_section = [f"## ✅ Result for `{sbom_name}`\n"]
+    if is_valid:
+        new_section.append("✅ All required parameters are present and valid.\n")
+    else:
+        new_section.append("❌ Validation failed. Missing or invalid parameters:\n")
+        for issue in issues:
+            new_section.append(f"- {issue}\n")
+
+    # Read existing content
+    existing_lines = []
+    if os.path.exists(README_FILE):
+        with open(README_FILE, 'r', encoding='utf-8') as f:
+            existing_lines = f.readlines()
+
+    # Remove old section for this SBOM
+    updated_lines = []
+    skip = False
+    for line in existing_lines:
+        if line.startswith(f"## ✅ Result for `{sbom_name}`"):
+            skip = True
+            continue
+        if skip and line.startswith("## ✅ Result for `"):
+            skip = False  # End of this SBOM section
+        if not skip:
+            updated_lines.append(line)
+
+    # Append new result
+    updated_lines.append("\n" + "".join(new_section))
+
+    # Write back to README
+    with open(README_FILE, 'w', encoding='utf-8') as f:
+        f.writelines(updated_lines)
 
 def main():
     if not os.path.exists(SBOM_FOLDER):
         os.makedirs(SBOM_FOLDER)
 
-    processed = set()
-    if os.path.exists(README_FILE):
-        with open(README_FILE, 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.startswith("## ✅ Result for `"):
-                    processed.add(line.strip().split("`")[1])
-
     for sbom in os.listdir(SBOM_FOLDER):
-        if not sbom.endswith(".json") or sbom in processed:
+        if not sbom.endswith(".json"):
             continue
 
         filepath = os.path.join(SBOM_FOLDER, sbom)
@@ -90,4 +107,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
