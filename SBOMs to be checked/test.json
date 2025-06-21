@@ -9,10 +9,10 @@
       "supplier": { "name": "test supplier" },
       "name": "Component A",
       "type": "library",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "author": "Author A",
       "licenses": [{ "license": { "id": "MIT" } }],
-      "purl": "pkg:maven/org.example/component-a@2.0.0",
+      "purl": "pkg:maven/org.example/component-a@3.0.0",
       "bom-ref": "ref-1",
       "properties": [{ "name": "previous_version", "value": "0.9.0" }]
     }
